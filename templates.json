@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "categories": [
+    "Grade Updates",
+    "Test Corrections",
+    "Missing Work",
+    "Retakes",
+    "Parent Communication",
+    "Attendance",
+    "General Responses"
+  ],
+  "templates": [
+    {
+      "id": "grade-update",
+      "category": "Grade Updates",
+      "title": "Grades updated",
+      "audience": "student",
+      "subject": "Grades updated in Infinite Campus",
+      "body": "Your grades have been updated and synced to Infinite Campus. Please allow approximately one hour for changes to appear.",
+      "favorite": true
+    },
+    {
+      "id": "assignment-graded",
+      "category": "Grade Updates",
+      "title": "Assignment graded",
+      "audience": "student",
+      "subject": "{{assignmentName}} has been graded",
+      "body": "I finished grading {{assignmentName}}, and your score is now in Infinite Campus. Let me know if you have any questions about it.",
+      "favorite": false
+    },
+    {
+      "id": "grade-question",
+      "category": "Grade Updates",
+      "title": "Looking into your grade",
+      "audience": "student",
+      "subject": "Re: Your grade in {{course}}",
+      "body": "Thanks for asking about your grade. I'll take a look and get back to you by {{date}}. In the meantime, you can see the score for each assignment in Infinite Campus.",
+      "favorite": false
+    },
+    {
+      "id": "correction-dates",
+      "category": "Test Corrections",
+      "title": "Test correction dates",
+      "audience": "student",
+      "subject": "Test corrections: {{startDate}} to {{endDate}}",
+      "body": "Test corrections begin on {{startDate}} and end on {{endDate}}. Please come during that time to improve your grade.",
+      "favorite": true
+    },
+    {
+      "id": "correction-how",
+      "category": "Test Corrections",
+      "title": "How test corrections work",
+      "audience": "student",
+      "subject": "How test corrections work",
+      "body": "To do test corrections, come to my room during the correction window and bring your test. For each question you missed, explain the mistake and show the correct work. Corrections need to be finished by {{endDate}}.",
+      "favorite": false
+    },
+    {
+      "id": "missing-work",
+      "category": "Missing Work",
+      "title": "Missing work reminder",
+      "audience": "student",
+      "subject": "Missing work in {{course}}",
+      "body": "Please submit any missing assignments before the deadline listed in Infinite Campus.",
+      "favorite": true
+    },
+    {
+      "id": "missing-assignment",
+      "category": "Missing Work",
+      "title": "Missing a specific assignment",
+      "audience": "student",
+      "subject": "Missing: {{assignmentName}}",
+      "body": "I don't have {{assignmentName}} from you yet. Please turn it in by {{date}} so you can get credit for it. If you already turned it in, reply to this email and let me know where.",
+      "favorite": false
+    },
+    {
+      "id": "late-work",
+      "category": "Missing Work",
+      "title": "Late work received",
+      "audience": "student",
+      "subject": "Re: Late assignment",
+      "body": "Thank you for submitting your assignment. I will review it and update the grade as soon as possible.",
+      "favorite": true
+    },
+    {
+      "id": "retake-approved",
+      "category": "Retakes",
+      "title": "Retake approved",
+      "audience": "student",
+      "subject": "Retake for {{assignmentName}}",
+      "body": "Yes, you can retake {{assignmentName}}. The retake is on {{date}}. Please review your notes and your corrected test before then.",
+      "favorite": false
+    },
+    {
+      "id": "retake-policy",
+      "category": "Retakes",
+      "title": "Retake policy",
+      "audience": "student",
+      "subject": "Re: Retakes",
+      "body": "Retakes are available once you finish your test corrections. When your corrections are done, email me and we'll set up a time for the retake. Your higher score is the one that counts.",
+      "favorite": false
+    },
+    {
+      "id": "parent-update",
+      "category": "Parent Communication",
+      "title": "Missing work update for parents",
+      "audience": "parent",
+      "subject": "Update on {{studentName}} in {{course}}",
+      "body": "I'm reaching out with a quick update on {{studentName}} in {{course}}. {{studentName}} is currently missing {{assignmentName}}. Turning it in by {{date}} would really help their grade. Please let me know if you have any questions.",
+      "favorite": false
+    },
+    {
+      "id": "parent-thanks",
+      "category": "Parent Communication",
+      "title": "Thanks for reaching out",
+      "audience": "parent",
+      "subject": "Re: {{studentName}}",
+      "body": "Thank you for reaching out about {{studentName}}. I'm looking into it and will get back to you by {{date}}.",
+      "favorite": false
+    },
+    {
+      "id": "parent-meeting",
+      "category": "Parent Communication",
+      "title": "Conference request",
+      "audience": "parent",
+      "subject": "Meeting about {{studentName}}",
+      "body": "I'd like to set up a time to talk about how {{studentName}} is doing in {{course}}. Would {{date}} work for a quick call or meeting? If not, just send me a few times that work for you.",
+      "favorite": false
+    },
+    {
+      "id": "absent-work",
+      "category": "Attendance",
+      "title": "Work missed while absent",
+      "audience": "student",
+      "subject": "What you missed on {{date}}",
+      "body": "Sorry you were out on {{date}}. The notes and assignments from that day are posted online. Please make up the missed work within a few days, and come see me if anything doesn't make sense.",
+      "favorite": false
+    },
+    {
+      "id": "attendance-check",
+      "category": "Attendance",
+      "title": "Checking in on absences",
+      "audience": "parent",
+      "subject": "Checking in on {{studentName}}",
+      "body": "I noticed {{studentName}} has missed a few classes recently, most recently on {{date}}. I wanted to check in and make sure everything is okay, and to let you know I'm happy to help them catch up.",
+      "favorite": false
+    },
+    {
+      "id": "received",
+      "category": "General Responses",
+      "title": "Got it, thanks",
+      "audience": "student",
+      "subject": "Re: Your email",
+      "body": "Thanks for your email! I got it and will get back to you soon.",
+      "favorite": false
+    },
+    {
+      "id": "come-see-me",
+      "category": "General Responses",
+      "title": "Come see me",
+      "audience": "student",
+      "subject": "Re: Your question",
+      "body": "Great question. It's easier to explain in person, so please stop by my room before or after school and I'll walk you through it.",
+      "favorite": false
+    },
+    {
+      "id": "extension",
+      "category": "General Responses",
+      "title": "Extension approved",
+      "audience": "student",
+      "subject": "Extension for {{assignmentName}}",
+      "body": "You can have an extension on {{assignmentName}}. Your new due date is {{date}}.",
+      "favorite": false
+    }
+  ]
+}

@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ReplyDesk</title>
+  <meta name="description" content="Answer the same student emails in seconds. Pick a student, pick a template, open an Outlook draft.">
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ReplyDesk">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <!-- Apply the saved theme before the page paints, so dark mode never flashes white. -->
+  <script>
+    try {
+      var t = JSON.parse(localStorage.getItem('replydesk.settings') || '{}').theme;
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch (e) { /* storage blocked: follow the system setting */ }
+  </script>
+</head>
+<body>
+  <!-- Icon set. Each icon is used with <svg><use href="#i-name"/></svg>. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="8" rx="2"/><rect x="13.5" y="3.5" width="7" height="5" rx="2"/><rect x="13.5" y="11.5" width="7" height="9" rx="2"/><rect x="3.5" y="14.5" width="7" height="6" rx="2"/></symbol>
+      <symbol id="i-students" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 19.5c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.2 14.2c2.6.1 4.5 1.9 5.3 4.6"/></symbol>
+      <symbol id="i-templates" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="12" height="15" rx="2.5"/><path d="M8 8h5M8 11.5h5M8 15h3"/><path d="M19.5 7v11a3 3 0 0 1-3 3H8"/></symbol>
+      <symbol id="i-compose" viewBox="0 0 24 24"><path d="M12 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V12"/><path d="M17.8 3.7a1.9 1.9 0 0 1 2.7 2.7L12.3 14.6 9 15.5l.9-3.3z"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/><circle cx="12" cy="12" r="6.3"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4M18.7 18.7l-1.4-1.4M6.7 6.7 5.3 5.3"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 5.5v-.5a1.5 1.5 0 0 0-1.5-1.5H6A2.5 2.5 0 0 0 3.5 6v8a1.5 1.5 0 0 0 1.5 1.5h.5"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12a1.5 1.5 0 0 0 1.5 1.5h6.4a1.5 1.5 0 0 0 1.5-1.5l.8-12"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="M15.5 5.5l3 3M4.5 19.5l1-4L16 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4.5M7.5 9 12 4.5 16.5 9"/><path d="M4.5 15v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5V15M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 15v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M20.5 3.5 10 14M20.5 3.5 14 20.5l-4-6.5-6.5-4z"/></symbol>
+      <symbol id="i-open" viewBox="0 0 24 24"><path d="M13.5 4.5h6v6M19.5 4.5 11 13"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+      <symbol id="i-duplicate" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M14 11.5v5M11.5 14h5"/><path d="M15.5 5.5v-.5a1.5 1.5 0 0 0-1.5-1.5H6A2.5 2.5 0 0 0 3.5 6v8a1.5 1.5 0 0 0 1.5 1.5h.5"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></symbol>
+      <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6L4 8.7"/><path d="M4 4v4.7h4.7M12 8v4l3 2"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 5 13.5h6l-1 8 8-11h-6z"/></symbol>
+      <symbol id="i-install" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="12.5" rx="2.5"/><path d="M8.5 20h7M12 7.5v5.5M9.5 10.5 12 13l2.5-2.5"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+      <symbol id="i-snooze" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M10 10.5h4l-4 5h4M5 4.5 3 6.5M19 4.5l2 2"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <!-- ===================================================== Sidebar -->
+    <aside class="sidebar" aria-label="Main">
+      <div class="brand">
+        <img class="brand-icon" src="icons/favicon.svg" alt="">
+        <span class="brand-name">ReplyDesk</span>
+      </div>
+      <nav class="nav" id="nav">
+        <a class="nav-item" href="#/dashboard" data-route="dashboard"><svg><use href="#i-dashboard"/></svg><span>Dashboard</span></a>
+        <a class="nav-item" href="#/students" data-route="students"><svg><use href="#i-students"/></svg><span>Students</span></a>
+        <a class="nav-item" href="#/templates" data-route="templates"><svg><use href="#i-templates"/></svg><span>Templates</span></a>
+        <a class="nav-item" href="#/builder" data-route="builder"><svg><use href="#i-compose"/></svg><span>Draft Builder</span></a>
+        <a class="nav-item" href="#/scheduled" data-route="scheduled"><svg><use href="#i-clock"/></svg><span>Scheduled Drafts</span><b class="nav-badge" id="navBadge" hidden>0</b></a>
+        <a class="nav-item" href="#/settings" data-route="settings"><svg><use href="#i-settings"/></svg><span>Settings</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-button" id="installButton" type="button" hidden><svg><use href="#i-install"/></svg><span>Install app</span></button>
+        <p class="sidebar-note">Everything stays in this browser.</p>
+      </div>
+    </aside>
+
+    <!-- ===================================================== Main column -->
+    <div class="main">
+      <header class="topbar">
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <div class="topbar-actions">
+          <button class="search-trigger" id="searchTrigger" type="button" aria-label="Search students and templates">
+            <svg><use href="#i-search"/></svg><span>Search</span><kbd id="searchKbd">Ctrl K</kbd>
+          </button>
+          <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg class="when-light"><use href="#i-moon"/></svg><svg class="when-dark"><use href="#i-sun"/></svg>
+          </button>
+          <div class="bell-wrap">
+            <button class="icon-button" id="bellButton" type="button" aria-label="Reminders" aria-haspopup="true" aria-expanded="false" title="Reminders">
+              <svg><use href="#i-bell"/></svg><b class="dot-badge" id="bellBadge" hidden>0</b>
+            </button>
+            <div class="popover bell-popover" id="bellPopover" hidden>
+              <div class="popover-head"><strong>Reminders</strong><a href="#/scheduled" id="bellAll">See all</a></div>
+              <div id="bellList"></div>
+            </div>
+          </div>
+          <a class="button primary compose-button" href="#/builder" data-new-email><svg><use href="#i-compose"/></svg><span>New email</span></a>
+        </div>
+      </header>
+
+      <main class="views" id="views">
+        <!-- ===================================================== Dashboard -->
+        <section class="view" id="view-dashboard" data-title="Dashboard">
+          <div class="hero">
+            <div>
+              <h2 class="hero-title" id="greeting">Good morning</h2>
+              <p class="hero-sub" id="todayLine"></p>
+            </div>
+            <a class="button primary large" href="#/builder" data-new-email><svg><use href="#i-compose"/></svg>Write an email</a>
+          </div>
+
+          <div class="card setup-card" id="setupCard" hidden>
+            <div class="card-head"><h3>Get set up</h3><span class="muted" id="setupProgress"></span></div>
+            <ol class="setup-list" id="setupList"></ol>
+          </div>
+
+          <div class="stats" id="stats"></div>
+
+          <div class="dash-grid">
+            <div class="card">
+              <div class="card-head"><h3><svg class="head-icon star-icon"><use href="#i-star"/></svg>Favorite templates</h3><a href="#/templates?filter=favorites">All templates</a></div>
+              <div class="quick-grid" id="dashFavorites"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3><svg class="head-icon"><use href="#i-history"/></svg>Recently used</h3></div>
+              <div class="list" id="dashRecentTemplates"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3><svg class="head-icon"><use href="#i-clock"/></svg>Coming up</h3><a href="#/scheduled">Scheduled drafts</a></div>
+              <div class="list" id="dashReminders"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3><svg class="head-icon"><use href="#i-send"/></svg>Recent drafts</h3><a href="#/scheduled?tab=history">History</a></div>
+              <div class="list" id="dashHistory"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Students -->
+        <section class="view" id="view-students" data-title="Students" hidden>
+          <div class="toolbar">
+            <label class="search-field">
+              <svg><use href="#i-search"/></svg>
+              <input type="search" id="studentSearch" placeholder="Search by name, email or course" autocomplete="off">
+            </label>
+            <div class="toolbar-actions">
+              <button class="button" type="button" id="importRosterButton"><svg><use href="#i-upload"/></svg>Import CSV</button>
+              <button class="button" type="button" id="pasteRosterButton"><svg><use href="#i-copy"/></svg>Paste names</button>
+              <button class="button" type="button" id="exportRosterButton"><svg><use href="#i-download"/></svg>Export</button>
+              <button class="button primary" type="button" id="addStudentButton"><svg><use href="#i-plus"/></svg>Add student</button>
+            </div>
+          </div>
+
+          <div class="selection-bar" id="studentSelectionBar" hidden>
+            <span id="studentSelectionCount">0 selected</span>
+            <button class="button small" type="button" id="studentSelectNone">Clear</button>
+            <button class="button small danger" type="button" id="studentDeleteSelected"><svg><use href="#i-trash"/></svg>Remove</button>
+          </div>
+
+          <div class="card table-card" id="rosterCard">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="col-check"><input type="checkbox" id="studentSelectAll" aria-label="Select all students"></th>
+                  <th><button class="sort-button" type="button" data-sort="name">Name</button></th>
+                  <th class="hide-phone">Email</th>
+                  <th class="hide-narrow">Parent email</th>
+                  <th class="hide-narrow"><button class="sort-button" type="button" data-sort="course">Course</button></th>
+                  <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="rosterBody"></tbody>
+            </table>
+            <p class="table-foot muted" id="rosterFoot"></p>
+          </div>
+
+          <div class="empty-state" id="rosterEmpty" hidden>
+            <div class="empty-icon"><svg><use href="#i-students"/></svg></div>
+            <h3>No students yet</h3>
+            <p>Import a CSV with a <b>Name</b> column, or paste a list of names straight from Infinite Campus. <b>Email</b>, <b>Parent Email</b> and <b>Course</b> are optional: without an email, Outlook looks the student up by name.</p>
+            <div class="empty-actions">
+              <button class="button primary" type="button" data-action="import-roster"><svg><use href="#i-upload"/></svg>Import CSV</button>
+              <button class="button" type="button" data-action="paste-roster"><svg><use href="#i-copy"/></svg>Paste names</button>
+              <button class="button" type="button" data-action="load-sample">Try the sample roster</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Templates -->
+        <section class="view" id="view-templates" data-title="Templates" hidden>
+          <div class="toolbar">
+            <label class="search-field">
+              <svg><use href="#i-search"/></svg>
+              <input type="search" id="templateSearch" placeholder="Search templates" autocomplete="off">
+            </label>
+            <div class="toolbar-actions">
+              <button class="button primary" type="button" id="newTemplateButton"><svg><use href="#i-plus"/></svg>New template</button>
+            </div>
+          </div>
+          <div class="chips" id="templateFilters" role="tablist" aria-label="Filter templates"></div>
+          <div id="templateGroups"></div>
+          <div class="empty-state" id="templatesEmpty" hidden>
+            <div class="empty-icon"><svg><use href="#i-templates"/></svg></div>
+            <h3>Nothing matches</h3>
+            <p>Try a different search, or make a new template.</p>
+          </div>
+        </section>
+
+        <!-- ===================================================== Draft builder -->
+        <section class="view" id="view-builder" data-title="Draft Builder" hidden>
+          <div class="builder">
+            <div class="builder-steps">
+              <!-- Step 1: who -->
+              <div class="card step">
+                <div class="step-head"><span class="step-num">1</span><h3>Student</h3></div>
+                <div class="combo" id="studentCombo">
+                  <label class="search-field">
+                    <svg><use href="#i-search"/></svg>
+                    <input type="text" id="studentPick" placeholder="Search students" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="studentPickList" aria-autocomplete="list">
+                  </label>
+                  <ul class="combo-list" id="studentPickList" role="listbox" hidden></ul>
+                </div>
+                <div class="picked" id="pickedStudent" hidden></div>
+                <div class="segmented" id="recipientSeg" role="radiogroup" aria-label="Send to" hidden>
+                  <button type="button" role="radio" data-to="student">Student</button>
+                  <button type="button" role="radio" data-to="parent">Parent</button>
+                  <button type="button" role="radio" data-to="both">Both</button>
+                </div>
+                <p class="inline-note" id="recipientNote" hidden></p>
+              </div>
+
+              <!-- Step 2: what -->
+              <div class="card step">
+                <div class="step-head"><span class="step-num">2</span><h3>Template</h3></div>
+                <div class="combo" id="templateCombo">
+                  <label class="search-field">
+                    <svg><use href="#i-search"/></svg>
+                    <input type="text" id="templatePick" placeholder="Search templates" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="templatePickList" aria-autocomplete="list">
+                  </label>
+                  <ul class="combo-list" id="templatePickList" role="listbox" hidden></ul>
+                </div>
+                <div class="picked" id="pickedTemplate" hidden></div>
+                <div class="quick-chips" id="builderQuickTemplates"></div>
+              </div>
+
+              <!-- Step 3: details (only the blanks this template needs) -->
+              <div class="card step" id="detailsStep" hidden>
+                <div class="step-head"><span class="step-num">3</span><h3>Details</h3></div>
+                <div class="fields" id="placeholderFields"></div>
+              </div>
+            </div>
+
+            <!-- The email itself -->
+            <div class="card email-card">
+              <div class="email-head">
+                <h3>Email</h3>
+                <span class="autosave muted" id="autosaveNote">Autosaved</span>
+              </div>
+              <label class="email-row"><span>To</span><input type="text" id="draftTo" placeholder="student@school.org" autocomplete="off" spellcheck="false"></label>
+              <label class="email-row"><span>Cc</span><input type="text" id="draftCc" placeholder="Optional" autocomplete="off" spellcheck="false"></label>
+              <label class="email-row"><span>Subject</span><input type="text" id="draftSubject" placeholder="Subject" autocomplete="off"></label>
+              <textarea id="draftBody" class="email-body" placeholder="Pick a student and a template, or just start typing." spellcheck="true"></textarea>
+              <div class="edited-note" id="editedNote" hidden>
+                You edited this email, so changing the details won't rewrite it.
+                <button class="link-button" type="button" id="resetDraft">Rebuild from template</button>
+              </div>
+              <div class="email-meta">
+                <span class="blanks" id="blanksNote" hidden></span>
+                <span class="counter muted" id="charCounter">0 characters</span>
+              </div>
+              <div class="email-actions">
+                <button class="button primary large" type="button" id="openDraftButton">
+                  <svg><use href="#i-open"/></svg><span id="openDraftLabel">Open Outlook Draft</span>
+                </button>
+                <button class="button" type="button" id="copyBodyButton"><svg><use href="#i-copy"/></svg>Copy</button>
+                <button class="button" type="button" id="laterButton"><svg><use href="#i-clock"/></svg>Later</button>
+                <button class="button ghost" type="button" id="clearDraftButton" title="Start over">Clear</button>
+              </div>
+              <p class="hint muted"><kbd id="sendKbd">Ctrl</kbd> + <kbd>Enter</kbd> opens the draft.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Scheduled drafts -->
+        <section class="view" id="view-scheduled" data-title="Scheduled Drafts" hidden>
+          <div class="toolbar">
+            <div class="segmented tabs" id="scheduledTabs" role="tablist">
+              <button type="button" role="tab" data-tab="upcoming">Reminders</button>
+              <button type="button" role="tab" data-tab="saved">Saved drafts</button>
+              <button type="button" role="tab" data-tab="history">History</button>
+            </div>
+            <div class="toolbar-actions">
+              <button class="button primary" type="button" id="newReminderButton"><svg><use href="#i-plus"/></svg>New reminder</button>
+            </div>
+          </div>
+          <p class="callout" id="scheduledCallout">
+            Reminders pop up here while ReplyDesk is open. If it was closed, you'll see anything you missed the next time you open it.
+          </p>
+          <div class="list card" id="scheduledList"></div>
+        </section>
+
+        <!-- ===================================================== Settings -->
+        <section class="view" id="view-settings" data-title="Settings" hidden>
+          <form class="settings" id="settingsForm" autocomplete="off">
+            <div class="card settings-group">
+              <h3>You</h3>
+              <label class="field"><span>Your name, the way students see it</span><input name="teacherName" placeholder="Ms. Johnson"></label>
+              <label class="field"><span>Default course</span><input name="defaultCourse" placeholder="Biology"><small>Used for {{course}} when a student doesn't have one.</small></label>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Every email</h3>
+              <label class="field"><span>Greeting for students</span><input name="greetingStudent" placeholder="Hi {{firstName}},"></label>
+              <label class="field"><span>Greeting for parents</span><input name="greetingParent" placeholder="Hello,"></label>
+              <label class="field"><span>Sign-off</span><input name="signoff" placeholder="Best,"></label>
+              <label class="field"><span>Signature</span><textarea name="signature" rows="3" placeholder="{{teacherName}}"></textarea><small>Placeholders work here too.</small></label>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Open drafts in</h3>
+              <div class="radio-cards" role="radiogroup">
+                <label class="radio-card"><input type="radio" name="openWith" value="mailto"><span><b>Outlook app</b><small>Uses a mailto link. Needs Outlook set as the computer's email app.</small></span></label>
+                <label class="radio-card"><input type="radio" name="openWith" value="outlookWeb"><span><b>Outlook on the web</b><small>Opens outlook.office.com. Best for school computers and Chromebooks.</small></span></label>
+                <label class="radio-card"><input type="radio" name="openWith" value="gmail"><span><b>Gmail</b><small>For Google schools.</small></span></label>
+              </div>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Students with no email</h3>
+              <p class="muted">For "name only" students. Your school's Outlook already knows everyone's address, so ReplyDesk doesn't need it.</p>
+              <div class="radio-cards" role="radiogroup">
+                <label class="radio-card"><input type="radio" name="nameOnlyTo" value="name"><span><b>Put their name in To</b><small>Outlook looks up the address. If it doesn't, click the name and pick the student.</small></span></label>
+                <label class="radio-card"><input type="radio" name="nameOnlyTo" value="blank"><span><b>Leave To empty</b><small>Their name gets copied. Paste it into To and pick them from Outlook's list.</small></span></label>
+              </div>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Appearance</h3>
+              <div class="segmented" id="themeSeg" role="radiogroup" aria-label="Theme">
+                <button type="button" role="radio" data-theme-choice="system">Automatic</button>
+                <button type="button" role="radio" data-theme-choice="light">Light</button>
+                <button type="button" role="radio" data-theme-choice="dark">Dark</button>
+              </div>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Reminders</h3>
+              <p class="muted">Reminders always show up inside ReplyDesk. You can also get a pop-up notification from the browser.</p>
+              <button class="button" type="button" id="notifyButton"><svg><use href="#i-bell"/></svg>Turn on notifications</button>
+              <small class="muted" id="notifyStatus"></small>
+            </div>
+
+            <div class="card settings-group">
+              <h3>Your data</h3>
+              <p class="muted">Everything is saved in this browser on this computer. Nothing is uploaded anywhere. Export a backup to move it to another computer.</p>
+              <div class="button-row">
+                <button class="button" type="button" id="exportBackup"><svg><use href="#i-download"/></svg>Export backup</button>
+                <button class="button" type="button" id="importBackup"><svg><use href="#i-upload"/></svg>Import backup</button>
+                <button class="button" type="button" id="importTemplates"><svg><use href="#i-upload"/></svg>Import templates.json</button>
+                <button class="button" type="button" id="restoreTemplates">Restore default templates</button>
+              </div>
+              <div class="danger-zone">
+                <div><b>Clear everything</b><small class="muted">Deletes the roster, templates, drafts and settings from this browser. Do this before you leave a shared computer.</small></div>
+                <button class="button danger" type="button" id="clearAll"><svg><use href="#i-trash"/></svg>Clear all data</button>
+              </div>
+            </div>
+
+            <p class="about muted">ReplyDesk <span id="appVersion"></span> · Made by Abdur Rahman Ansar · Runs entirely in your browser</p>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================================================== Dialogs -->
+
+  <!-- Add / edit student -->
+  <dialog class="dialog" id="studentDialog">
+    <form method="dialog" id="studentForm" novalidate>
+      <h2 id="studentDialogTitle">Add student</h2>
+      <label class="field"><span>Name</span><input name="name" required placeholder="John Smith"></label>
+      <label class="field"><span>Email <i>(optional)</i></span><input name="email" type="email" placeholder="johnsmith@school.org" spellcheck="false"><small>Leave it empty and Outlook finds them by name.</small></label>
+      <label class="field"><span>Parent email <i>(optional)</i></span><input name="parentEmail" placeholder="parent@example.com" spellcheck="false"><small>Separate more than one with a comma.</small></label>
+      <label class="field"><span>Course <i>(optional)</i></span><input name="course" placeholder="Biology - Period 2" list="courseList"></label>
+      <datalist id="courseList"></datalist>
+      <p class="form-error" id="studentError" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" value="save" id="studentSave">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- CSV import preview -->
+  <dialog class="dialog wide" id="importDialog">
+    <form method="dialog" id="importForm">
+      <h2>Import roster</h2>
+      <p class="muted" id="importSummary"></p>
+      <div class="table-scroll"><table class="table compact" id="importPreview"></table></div>
+      <div class="radio-cards inline" role="radiogroup">
+        <label class="radio-card"><input type="radio" name="mode" value="merge" checked><span><b>Add to my roster</b><small>Students already on your roster get updated.</small></span></label>
+        <label class="radio-card"><input type="radio" name="mode" value="replace"><span><b>Replace my roster</b><small>Removes everyone who isn't in this file.</small></span></label>
+      </div>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" value="import" id="importConfirm">Import</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Paste a list of students -->
+  <dialog class="dialog wide" id="pasteDialog">
+    <form method="dialog" id="pasteForm" novalidate>
+      <h2>Paste names</h2>
+      <p class="muted">One student per line. You can copy a whole roster from Infinite Campus, Excel or Google Sheets and paste it here. "Smith, John" becomes John Smith. Emails and courses are picked up if they're in there, but you don't need them.</p>
+      <label class="field"><span class="visually-hidden">Students</span><textarea id="pasteText" rows="10" placeholder="John Smith&#10;Sarah Lee&#10;Garcia, Diego" spellcheck="false"></textarea></label>
+      <p class="form-error" id="pasteError" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" value="next" id="pasteNext">Next</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add / edit template -->
+  <dialog class="dialog wide" id="templateDialog">
+    <form method="dialog" id="templateForm" novalidate>
+      <h2 id="templateDialogTitle">New template</h2>
+      <div class="two-col">
+        <div>
+          <label class="field"><span>Name</span><input name="title" required placeholder="Late work received"></label>
+          <div class="field-row">
+            <label class="field"><span>Category</span>
+              <select name="category" id="templateCategory"></select>
+            </label>
+            <label class="field"><span>Usually sent to</span>
+              <select name="audience"><option value="student">Students</option><option value="parent">Parents</option></select>
+            </label>
+          </div>
+          <label class="field" id="newCategoryField" hidden><span>New category name</span><input name="newCategory" placeholder="Labs"></label>
+          <label class="field"><span>Subject</span><input name="subject" id="templateSubject" placeholder="Re: Your assignment"></label>
+          <label class="field"><span>Message</span><textarea name="body" id="templateBody" rows="7" required placeholder="Write the part that changes from email to email. The greeting and signature get added for you."></textarea></label>
+          <div class="placeholder-bar" id="placeholderBar" aria-label="Insert a placeholder"></div>
+          <label class="check"><input type="checkbox" name="greeting" checked> Add my greeting and signature</label>
+          <label class="check"><input type="checkbox" name="favorite"> Favorite</label>
+        </div>
+        <div class="preview-pane">
+          <span class="preview-label">Preview</span>
+          <div class="preview-subject" id="templatePreviewSubject"></div>
+          <pre class="preview-body" id="templatePreviewBody"></pre>
+        </div>
+      </div>
+      <p class="form-error" id="templateError" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" value="save">Save template</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Schedule a reminder / follow-up / saved draft -->
+  <dialog class="dialog" id="scheduleDialog">
+    <form method="dialog" id="scheduleForm">
+      <h2 id="scheduleTitle">Remind me later</h2>
+      <div class="segmented" id="kindSeg" role="radiogroup" aria-label="Type">
+        <button type="button" role="radio" data-kind="reminder">Reminder</button>
+        <button type="button" role="radio" data-kind="followup">Follow-up</button>
+        <button type="button" role="radio" data-kind="draft">Save draft</button>
+      </div>
+      <p class="muted small" id="kindHelp"></p>
+      <label class="field"><span>What for?</span><input name="title" placeholder="Check if John turned in the lab"></label>
+      <label class="field" id="scheduleStudentField"><span>Student <i>(optional)</i></span><input name="student" list="studentNameList" placeholder="Start typing a name"></label>
+      <datalist id="studentNameList"></datalist>
+      <fieldset class="when" id="whenField">
+        <legend>When</legend>
+        <div class="chips" id="whenChips"></div>
+        <input type="datetime-local" name="custom" id="whenCustom" hidden>
+      </fieldset>
+      <p class="attached muted" id="attachedNote" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" value="save" id="scheduleSave">Schedule</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Yes / no questions -->
+  <dialog class="dialog small" id="confirmDialog">
+    <form method="dialog">
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmText" class="muted"></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel" id="confirmCancel">Cancel</button>
+        <button class="button primary" value="ok" id="confirmOk">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Quick search (Ctrl K / Cmd K) -->
+  <dialog class="dialog palette" id="palette">
+    <div class="palette-input">
+      <svg><use href="#i-search"/></svg>
+      <input type="text" id="paletteInput" placeholder="Search students, templates, pages…" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="paletteList">
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="palette-list" id="paletteList" role="listbox"></ul>
+  </dialog>
+
+  <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+  <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="drop-overlay" id="dropOverlay" hidden><div><svg><use href="#i-upload"/></svg><p>Drop the CSV to import your roster</p></div></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

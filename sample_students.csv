@@ -1,0 +1,13 @@
+Name,Email,Parent Email,Course
+John Smith,johnsmith@students.example.org,smith.family@example.com,Biology - Period 2
+Sarah Lee,sarahlee@students.example.org,mlee@example.com,Biology - Period 2
+Alex Brown,alexbrown@students.example.org,,Biology - Period 2
+Priya Patel,priyapatel@students.example.org,patel.home@example.com,Biology - Period 3
+Marcus Johnson,marcusjohnson@students.example.org,dj.johnson@example.com,Biology - Period 3
+Emily Chen,emilychen@students.example.org,chen.parents@example.com,Biology - Period 3
+"Garcia, Diego",diegogarcia@students.example.org,lgarcia@example.com,AP Biology - Period 5
+Olivia Williams,oliviawilliams@students.example.org,,AP Biology - Period 5
+Noah Kim,noahkim@students.example.org,kim.family@example.com,AP Biology - Period 5
+Aisha Rahman,aisharahman@students.example.org,rahman.home@example.com,AP Biology - Period 5
+Liam O'Connor,liamoconnor@students.example.org,oconnors@example.com,Biology - Period 6
+Sofia Rossi,sofiarossi@students.example.org,,Biology - Period 6

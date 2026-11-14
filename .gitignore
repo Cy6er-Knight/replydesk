@@ -1,0 +1,9 @@
+# Real rosters have student names and emails. Keep them out of the repo.
+*.csv
+!sample_students.csv
+
+# Backups exported from ReplyDesk (they include the roster too)
+replydesk-backup-*.json
+
+.DS_Store
+Thumbs.db
